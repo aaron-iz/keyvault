@@ -13,7 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,7 +35,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> Login(@RequestBody LoginRequest request) {
-        logger.trace("/login called");
+        logger.trace("POST /api/auth/login");
 
         var user = repository.findByUsername(request.username()).get();
 
@@ -53,7 +54,7 @@ public class AuthController {
     @PostMapping("/register")
     @PreAuthorize("isAuthenticated()") // Only users in can create more users
     public ResponseEntity<AuthResponse> Register(@RequestBody RegisterRequest request) {
-        logger.trace("/register called");
+        logger.trace("POST /api/auth/register");
 
         var userOptional = repository.findByUsername(request.username());
         if (userOptional.isPresent()) {
