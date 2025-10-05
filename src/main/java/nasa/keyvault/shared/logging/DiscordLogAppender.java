@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class DiscordLogAppender extends AppenderBase<ILoggingEvent> {
     private final static String MessageFormat = """
+            
             [%s] - %s
             logger: %s
             method: %s
@@ -27,6 +28,7 @@ public class DiscordLogAppender extends AppenderBase<ILoggingEvent> {
             trace_id: %s
             success: %s
             details: %s
+            
             """;
     private final static int DiscordMaxMessageLength = 2000;
 
