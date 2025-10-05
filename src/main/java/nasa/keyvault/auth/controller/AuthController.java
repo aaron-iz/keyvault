@@ -43,7 +43,7 @@ public class AuthController {
 
         var user = repository.findByUsername(request.username()).get();
 
-        Logging.attachDetails("userId", user.getId().toString());
+        Logging.attachDetails("userId", user.getId());
 
         if (!encoder.matches(request.password(), user.getPassword())) {
             logger.warn("User attempted to login with an incorrect password");
@@ -76,7 +76,7 @@ public class AuthController {
         var user = new User(request.username(), encoder.encode(request.password()));
         user = repository.save(user);
 
-        Logging.attachDetails("userId", user.getId().toString());
+        Logging.attachDetails("userId", user.getId());
         logger.info("User successfully created, logging them in");
 
         var token = jwtService.generateToke(user);
@@ -88,7 +88,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> updatePassword(@PathVariable UUID id, @RequestBody UpdatePasswordRequest request) {
         logger.trace("PATCH /api/auth/password"); // Old password + new password > update.
-        Logging.attachDetails("userId", id.toString());
+        Logging.attachDetails("userId", id);
 
         var user = repository.findById(id).get();
 
