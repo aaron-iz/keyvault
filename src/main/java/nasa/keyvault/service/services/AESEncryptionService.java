@@ -37,7 +37,7 @@ public class AESEncryptionService implements EncryptionService {
         try {
             return encrypt(configuration.getMasterKey(), plain);
         } catch (Exception e) {
-            logger.error("Encryption failed: {}", e.getMessage());
+            logger.error("Encryption failed: {}", e.getMessage(), e);
             return null;
         }
     }
@@ -47,7 +47,7 @@ public class AESEncryptionService implements EncryptionService {
         try {
             return decrypt(configuration.getMasterKey(), cipher);
         } catch (Exception e) {
-            logger.error("Decryption failed: {}", e.getMessage());
+            logger.error("Decryption failed: {}", e.getMessage(), e);
             return null;
         }
     }

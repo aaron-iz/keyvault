@@ -4,6 +4,7 @@ import nasa.keyvault.service.config.OtpConfiguration;
 import nasa.keyvault.service.data.OtpRepository;
 import nasa.keyvault.service.models.OneTimePass;
 import nasa.keyvault.shared.external.DiscordWebhookRequest;
+import nasa.keyvault.shared.logging.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -78,7 +79,8 @@ public class DiscordOtpService implements OtpService<UUID> {
         }
 
         if (!otp.getUserId().equals(userId)) {
-            logger.warn("User {} attempted to consume an otp which is not theirs.", userId);
+            Logging.attachDetails("userId", userId);
+            logger.warn("User attempted to consume an otp which is not theirs");
 
             return null;
         }
