@@ -5,16 +5,16 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                [%level] - %d{yyyy-MM-dd HH:mm:ss.SSS} %n
-                logger: %logger %n
-                method: %method %n
-                exception: %ex %n
-                body: %msg %n
-                host: %X{host} %n
-                httpMethod: %X{http_method} %n
-                trace_id: %X{trace_id} %n
-                success: %X{success} %n
-                details: %X{details} %n
+[%level] - %d{yyyy-MM-dd HH:mm:ss.SSS}
+logger: %logger
+method: %method
+exception: %ex
+body: %msg
+host: %X{host}
+httpMethod: %X{http_method}
+trace_id: %X{trace_id}
+success: %X{success}
+details: %X{details} %n%n
             </pattern>
         </encoder>
     </appender>
