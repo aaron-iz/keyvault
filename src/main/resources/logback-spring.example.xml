@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Console appender (optional, keep logs in console) -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Discord appender -->
+    <appender name="DISCORD" class="nasa.keyvault.shared.logging.DiscordLogAppender">
+        <webhookUri>https://discord.com/api/webhooks/YOUR_WEBHOOK</webhookUri>
+    </appender>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="DISCORD"/>
+    </root>
+
+</configuration>
