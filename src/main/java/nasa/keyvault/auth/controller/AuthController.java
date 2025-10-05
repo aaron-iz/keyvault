@@ -3,10 +3,12 @@ package nasa.keyvault.auth.controller;
 import nasa.keyvault.auth.contracts.AuthResponse;
 import nasa.keyvault.auth.contracts.LoginRequest;
 import nasa.keyvault.auth.contracts.RegisterRequest;
+import nasa.keyvault.auth.contracts.UpdatePasswordRequest;
 import nasa.keyvault.auth.contracts.UserResponse;
 import nasa.keyvault.auth.data.UserRepository;
 import nasa.keyvault.auth.models.User;
 import nasa.keyvault.auth.services.JwtService;
+import nasa.keyvault.shared.logging.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/auth")
@@ -39,10 +43,12 @@ public class AuthController {
 
         var user = repository.findByUsername(request.username()).get();
 
-        if (!encoder.matches(request.password(), user.getPassword())) {
-            logger.warn("User {} had an unsuccessful login attempt", user.getUsername());
+        Logging.attachDetails("userId", user.getId().toString());
 
-            return ResponseEntity.badRequest().build();
+        if (!encoder.matches(request.password(), user.getPassword())) {
+            logger.warn("User attempted to login with an incorrect password");
+
+            throw new IllegalArgumentException("Incorrect password");
         }
 
         logger.info("logging {} in", user.getUsername());
@@ -58,25 +64,50 @@ public class AuthController {
 
         var userOptional = repository.findByUsername(request.username());
         if (userOptional.isPresent()) {
-            logger.info("Tried to make a user with a used username.");
+            logger.info("Tried to make a user with a used username");
 
             throw new IllegalArgumentException("User already in use");
         }
 
-        if (!validatePassword(request.password())) {
-            throw new IllegalArgumentException("Password must be 8 characters long, contain at least one of each: capital letter, lowercase letter and a number.");
-        }
+        enforceValidPassword(request.password());
 
         logger.info("Creating new user...");
 
         var user = new User(request.username(), encoder.encode(request.password()));
         user = repository.save(user);
 
-        logger.info("User successfully created, logging them in.");
+        Logging.attachDetails("userId", user.getId().toString());
+        logger.info("User successfully created, logging them in");
 
         var token = jwtService.generateToke(user);
 
         return ResponseEntity.ok(new AuthResponse(token, new UserResponse(user)));
+    }
+
+    @PatchMapping("/password/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> updatePassword(@PathVariable UUID id, @RequestBody UpdatePasswordRequest request) {
+        logger.trace("PATCH /api/auth/password"); // Old password + new password > update.
+        Logging.attachDetails("userId", id.toString());
+
+        var user = repository.findById(id).get();
+
+        if (!encoder.matches(request.oldPassword(), user.getPassword())) {
+            logger.info("User attempted to replace password with incorrect old password");
+
+            throw new IllegalArgumentException("Incorrect password");
+        }
+
+        enforceValidPassword(request.newPassword());
+        user.setPassword(encoder.encode(request.newPassword()));
+
+        return ResponseEntity.ok("Successfully updated password");
+    }
+
+    private void enforceValidPassword(String password) {
+        if (!validatePassword(password)) {
+            throw new IllegalArgumentException("Password must be 8 characters long, contain at least one of each: capital letter, lowercase letter and a number");
+        }
     }
 
     private static boolean validatePassword(String password) {
