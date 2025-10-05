@@ -25,7 +25,7 @@ public class LoggerMiddleware extends OncePerRequestFilter {
         try {
             MDC.put(LoggingConstants.HttpMethodKey, request.getMethod());
             MDC.put(LoggingConstants.HostKey, InetAddress.getLocalHost().getHostName());
-            MDC.put(LoggingConstants.TraceIdKey, UUID.randomUUID().toString().replace('-', ' '));
+            MDC.put(LoggingConstants.TraceIdKey, UUID.randomUUID().toString().replace("-", ""));
 
             filterChain.doFilter(request, response);
 
