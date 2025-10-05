@@ -4,7 +4,18 @@
     <!-- Console appender (optional, keep logs in console) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>
+                [%level] - %d{yyyy-MM-dd HH:mm:ss.SSS} %n
+                logger: %logger %n
+                method: %method %n
+                exception: %ex %n
+                body: %msg %n
+                host: %X{host} %n
+                httpMethod: %X{http_method} %n
+                trace_id: %X{trace_id} %n
+                success: %X{success} %n
+                details: %X{details} %n
+            </pattern>
         </encoder>
     </appender>
 
