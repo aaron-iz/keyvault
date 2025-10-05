@@ -6,6 +6,7 @@ import nasa.keyvault.service.data.SecretsRepository;
 import nasa.keyvault.service.models.Secret;
 import nasa.keyvault.service.services.EncryptionService;
 import nasa.keyvault.service.services.OtpService;
+import nasa.keyvault.shared.logging.Logging;
 import nasa.keyvault.shared.util.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class SecretsController {
     @GetMapping
     public ResponseEntity<List<SecretResponse>> getSecrets(@RequestParam(defaultValue = "0") int page) {
         logger.trace("GET /api/vault/secrets");
+        Logging.attachDetails("page", page);
 
         var pageable = PageRequest.of(page, Limit, Sort.by("createdAt").descending());
         var response = repository.findAll(pageable)
@@ -54,17 +56,21 @@ public class SecretsController {
                 .map(s -> new SecretResponse(s, null))
                 .toList();
 
+        Logging.attachDetails("count", response.size());
+
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SecretResponse> getSecret(@PathVariable UUID id) {
         logger.trace("GET /api/vault/secrets/{}", id.toString());
+        Logging.attachDetails("secretId", id);
 
         var secret = repository.findById(id).get();
 
         if (secret.getWebhookForOtp() != null) {
-            logger.info("Requested a secret which has MFA enabled, secret: {}", id);
+            logger.info("Requested a secret which has MFA enabled");
+            Logging.attachDetails("mfaEnabled", true);
 
             var user = HttpContext.getUser();
             otpService.sendOtp(secret.getWebhookForOtp(), secret.getId(), user.getId());
@@ -99,12 +105,15 @@ public class SecretsController {
         var secret = new Secret(request.title(), request.description(), request.webhookForOtp(), encryptedSecret, user.getId());
         secret = repository.save(secret);
 
+        Logging.attachDetails("secretId", secret.getId());
+
         return ResponseEntity.ok(new SecretResponse(secret, null));
     }
 
     @PatchMapping("{id}")
     public ResponseEntity<SecretResponse> updateSecret(@PathVariable UUID id, @RequestBody SecretRequest request) {
         logger.trace("PATCH /api/vault/secrets/{}", id.toString());
+        Logging.attachDetails("secretId", id);
 
         var user = HttpContext.getUser();
         var secret = repository.findById(id).get();
@@ -135,6 +144,7 @@ public class SecretsController {
     @DeleteMapping("{id}")
     public ResponseEntity<SecretResponse> deleteSecret(@PathVariable UUID id) {
         logger.trace("DELETE /api/vault/secrets/{}", id.toString());
+        Logging.attachDetails("secretId", id);
 
         repository.deleteById(id);
 
