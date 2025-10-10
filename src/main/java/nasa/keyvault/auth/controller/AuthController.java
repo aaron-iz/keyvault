@@ -8,9 +8,12 @@ import nasa.keyvault.auth.contracts.UserResponse;
 import nasa.keyvault.auth.data.UserRepository;
 import nasa.keyvault.auth.models.User;
 import nasa.keyvault.auth.services.JwtService;
+import nasa.keyvault.shared.exceptions.UnauthorizedAccessException;
 import nasa.keyvault.shared.logging.Logging;
+import nasa.keyvault.shared.util.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.AccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -87,10 +90,18 @@ public class AuthController {
     @PatchMapping("/password/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> updatePassword(@PathVariable UUID id, @RequestBody UpdatePasswordRequest request) {
-        logger.trace("PATCH /api/auth/password"); // Old password + new password > update.
+        logger.trace("PATCH /api/auth/password");
         Logging.attachDetails("userId", id);
 
         var user = repository.findById(id).get();
+
+        var requestingUser = HttpContext.getUser();
+        if (!requestingUser.getId().equals(id)) {
+            Logging.attachDetails("requestingUserId", requestingUser.getId());
+            logger.info("User tried to change a password that does not belong to it.");
+
+            throw new UnauthorizedAccessException();
+        }
 
         if (!encoder.matches(request.oldPassword(), user.getPassword())) {
             logger.info("User attempted to replace password with incorrect old password");
