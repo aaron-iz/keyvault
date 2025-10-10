@@ -40,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> Login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
         logger.trace("POST /api/auth/login");
 
         var user = repository.findByUsername(request.username()).get();
@@ -61,7 +61,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @PreAuthorize("isAuthenticated()") // Only users in can create more users
-    public ResponseEntity<AuthResponse> Register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         logger.trace("POST /api/auth/register");
 
         var userOptional = repository.findByUsername(request.username());
