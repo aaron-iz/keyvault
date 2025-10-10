@@ -15,6 +15,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
 @EnableMethodSecurity
@@ -51,6 +52,16 @@ public class SecurityConfiguration {
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+        http.cors(cors -> cors.configurationSource(req -> {
+            var config = new CorsConfiguration();
+
+            config.addAllowedOriginPattern("*");
+            config.addAllowedMethod("*");
+            config.addAllowedHeader("*");
+
+            return config;
+        }));
 
         return http.build();
     }
