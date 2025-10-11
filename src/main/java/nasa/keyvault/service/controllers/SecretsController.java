@@ -115,6 +115,8 @@ public class SecretsController {
         logger.trace("PATCH /api/vault/secrets/{}", id.toString());
         Logging.attachDetails("secretId", id);
 
+        // TODO, should not be able to update if has an OTP code in the current one, at least so I think.
+
         var user = HttpContext.getUser();
         var secret = repository.findById(id).get();
 
